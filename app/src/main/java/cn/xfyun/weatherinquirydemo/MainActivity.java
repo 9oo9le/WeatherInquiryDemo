@@ -15,57 +15,53 @@ import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.iflytek.aiui.AIUIAgent;
 import com.iflytek.aiui.AIUIConstant;
 import com.iflytek.aiui.AIUIEvent;
 import com.iflytek.aiui.AIUIListener;
 import com.iflytek.aiui.AIUIMessage;
-
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
 
+    //录音权限
     private String[] permissions = {Manifest.permission.RECORD_AUDIO};
 
     private Toast mToast;
     private EditText mNlpText;
 
     private AIUIAgent mAIUIAgent = null;
+
+    //交互状态
     private int mAIUIState = AIUIConstant.STATE_IDLE;
 
     @SuppressLint("ShowToast")
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         initLayout();
 
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
-        requestAllPower();
+        requestPermission();
     }
 
     /**
      * 初始化Layout。
      */
-    private void initLayout(){
+    private void initLayout() {
         findViewById(R.id.nlp_start).setOnClickListener(this);
 
         mNlpText = (EditText)findViewById(R.id.nlp_text);
     }
 
     @Override
-    public void onClick(View view)
-    {
+    public void onClick(View view) {
         if( !checkAIUIAgent() ){
             return;
         }
@@ -105,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean checkAIUIAgent(){
         if( null == mAIUIAgent ){
             Log.i( TAG, "create aiui agent" );
+
             //创建AIUIAgent
             mAIUIAgent = AIUIAgent.createAgent( this, getAIUIParams(), mAIUIListener );
         }
@@ -118,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return null != mAIUIAgent;
     }
 
+    //开始录音
     private void startVoiceNlp(){
         Log.i( TAG, "start voice nlp" );
         mNlpText.setText("");
@@ -135,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAIUIAgent.sendMessage(writeMsg);
     }
 
+    //AIUI事件监听器
     private AIUIListener mAIUIListener = new AIUIListener() {
 
         @Override
@@ -271,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     //申请录音权限
-    public void requestAllPower() {
+    public void requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             int i = ContextCompat.checkSelfPermission(this, permissions[0]);
             if (i != PackageManager.PERMISSION_GRANTED) {
